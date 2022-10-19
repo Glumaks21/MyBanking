@@ -1,15 +1,14 @@
 package data;
 
-import org.apache.commons.dbcp2.*;
+
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
 
-public class ConnectionHolder {
+public class DataSourceHolder {
     private static DataSource dataSource = null;
     static {
         try (FileInputStream fis = new FileInputStream("db.properties")) {
@@ -22,13 +21,13 @@ public class ConnectionHolder {
             dataSource.setPassword(fileProperties.getProperty("password"));
             dataSource.setMinIdle(Integer.parseInt(fileProperties.getProperty("min_idle")));
             dataSource.setMaxIdle(Integer.parseInt(fileProperties.getProperty("max_idle")));
-            ConnectionHolder.dataSource = dataSource;
+            DataSourceHolder.dataSource = dataSource;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+    public static DataSource getDataSource() {
+        return dataSource;
     }
 }
