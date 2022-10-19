@@ -1,20 +1,20 @@
 package data;
 
-
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class DataSourceHolder {
     private static DataSource dataSource = null;
     static {
-        try (FileInputStream fis = new FileInputStream("db.properties")) {
+        try (InputStream is = DataSourceHolder.class.getClassLoader().getResourceAsStream("db.properties")) {
             Properties fileProperties = new Properties();
-            fileProperties.load(fis);
+            fileProperties.load(is);
 
+            Class.forName(fileProperties.getProperty("driver"));
             BasicDataSource dataSource = new BasicDataSource();
             dataSource.setUrl(fileProperties.getProperty("url"));
             dataSource.setUsername(fileProperties.getProperty("user"));
@@ -24,6 +24,8 @@ public class DataSourceHolder {
             DataSourceHolder.dataSource = dataSource;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

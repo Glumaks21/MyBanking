@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Client registration</title>
+    </head>
+    <body>
+        <form method="post" action="/register-complete">
+            <h1>Enter passport info</h1>
+            <p>
+                <input type="text" minlength="10" maxlength="10" name="number" placeholder="Number" required>
+            </p>
+            <p>
+                <input type="text" name="name" placeholder="Name" required>
+            </p>
+            <p>
+                <input type="text" name="surname" placeholder="Surname" required>
+            </p>
+            <p>
+                <input type="text" name="patronymic" placeholder="Patronymic" required>
+            </p>
+            <p>
+                Male<input type="radio" name="sex" value="male" required>
+                Female<input type="radio" name="sex" value="female" required>
+            </p>
+            <p>
+                <input type="date" name="birthday" placeholder="Birthday" required>
+            </p>
+            <button type="submit">Send</button>
+        </form>
+    </body>
+</html>
