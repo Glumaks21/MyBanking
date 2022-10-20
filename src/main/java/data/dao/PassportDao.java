@@ -10,6 +10,17 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class PassportDao implements Dao<Passport> {
+    static final String SQL_SELECT_BY_NUMBER = "SELECT * FROM passports WHERE number=?;";
+    static final String SQL_SELECT_BY_ID = "SELECT * FROM passports WHERE id=?;";
+    static final String SQL_INSERT = "INSERT INTO passports(number, name, surname, patronymic, sex, birthday) " +
+                                    "VALUES(?, ?, ?, ?, ?, ?);";
+    static final String SQL_UPDATE_BY_ID = "UPDATE passports SET " +
+                                            "number = ?, name = ?, surname = ?, patronymic = ?, sex = ?, birthday = ? " +
+                                            "WHERE id = ?;";
+    static final String SQL_DELETE_BY_ID = "DELETE FROM passports WHERE id=?;";
+    static final String SQL_SELECT_ALL = "SELECT * FROM passports;";
+
+
     private final DataSource dataSource;
 
     public PassportDao(DataSource dataSource) {
@@ -20,8 +31,8 @@ public class PassportDao implements Dao<Passport> {
     public Optional<Passport> findByNumber(String number) {
         Passport passport = null;
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                    "SELECT * FROM passports WHERE number=?");
+            PreparedStatement statement =
+                    connection.prepareStatement(SQL_SELECT_BY_NUMBER);
             statement.setString(1, number);
 
             ResultSet resultSet = statement.executeQuery();
@@ -39,8 +50,8 @@ public class PassportDao implements Dao<Passport> {
     public Optional<Passport> find(long id) {
         Passport passport = null;
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                    "SELECT * FROM passports WHERE id=?");
+            PreparedStatement statement =
+                    connection.prepareStatement(SQL_SELECT_BY_ID);
             statement.setLong(1, id);
 
             ResultSet resultSet = statement.executeQuery();
@@ -55,21 +66,19 @@ public class PassportDao implements Dao<Passport> {
     }
 
     @Override
-    public void save(Passport entity) {
+    public void save(Passport passport) {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
 
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO passports(number, name, surname, patronymic, sex, birthday) " +
-                        "VALUES(?, ?, ?, ?, ?, ?)");
-            statement.setString(1, entity.getNumber());
-            statement.setString(2, entity.getName());
-            statement.setString(3, entity.getSurname());
-            statement.setString(4, entity.getPatronymic());
-            statement.setString(5, entity.getSex());
-            statement.setDate(6, entity.getBirthday());
+            PreparedStatement statement = connection.prepareStatement(SQL_INSERT);
+            statement.setString(1, passport.getNumber());
+            statement.setString(2, passport.getName());
+            statement.setString(3, passport.getSurname());
+            statement.setString(4, passport.getPatronymic());
+            statement.setString(5, passport.getSex());
+            statement.setDate(6, passport.getBirthday());
 
             statement.execute();
 
@@ -90,11 +99,12 @@ public class PassportDao implements Dao<Passport> {
 
     @Override
     public void update(long id, Passport passport) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE passports SET " +
-                            "number = ?, name = ?, surname = ?, patronymic = ?, sex = ?, birthday = ? " +
-                            "WHERE id = ?;");
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+
+            PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_BY_ID);
             statement.setString(1, passport.getNumber());
             statement.setString(2, passport.getName());
             statement.setString(3, passport.getSurname());
@@ -104,20 +114,43 @@ public class PassportDao implements Dao<Passport> {
             statement.setLong(7, id);
 
             statement.execute();
+
+            connection.commit();
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public void delete(long id) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                    "DELETE FROM passports WHERE id=?");
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+
+            PreparedStatement statement = connection.prepareStatement(SQL_DELETE_BY_ID);
             statement.setLong(1, id);
 
             statement.execute();
+            connection.commit();
         } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             throw new RuntimeException(e);
         }
     }
@@ -126,9 +159,9 @@ public class PassportDao implements Dao<Passport> {
     public List<Passport> getAll() {
         try (Connection connection = dataSource.getConnection()) {
             List<Passport> passports = new ArrayList<>();
+            Statement statement = connection.createStatement();
 
-            ResultSet resultSet = connection.createStatement().
-                    executeQuery("SELECT * FROM passports");
+            ResultSet resultSet = statement.executeQuery(SQL_SELECT_ALL);
             while (resultSet.next()) {
                 passports.add(mapToPassport(resultSet));
             }
