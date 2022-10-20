@@ -1,6 +1,7 @@
 package data.entity;
 
 import java.sql.Date;
+import java.util.Objects;
 
 public class Passport {
     private long id;
@@ -68,11 +69,31 @@ public class Passport {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Passport passport = (Passport) o;
+        return Objects.equals(number, passport.number) &&
+            Objects.equals(name, passport.name) &&
+            Objects.equals(surname, passport.surname) &&
+            Objects.equals(patronymic, passport.patronymic) &&
+            Objects.equals(sex, passport.sex) &&
+            Objects.equals(birthday.toString(), passport.birthday.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(number, name, surname, patronymic, sex, birthday);
+    }
+
+    @Override
     public String toString() {
         return "Passport{" +
-                "number=" + number +
+                "id=" + id +
+                ", number='" + number + '\'' +
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
+                ", patronymic='" + patronymic + '\'' +
                 ", sex='" + sex + '\'' +
                 ", birthday=" + birthday +
                 '}';
