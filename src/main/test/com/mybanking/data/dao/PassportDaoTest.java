@@ -1,7 +1,8 @@
-package data.dao;
+package com.mybanking.data.dao;
 
-import data.DataSourceHolder;
-import data.entity.Passport;
+import com.mybanking.data.DataSourceHolder;
+import com.mybanking.data.dao.PassportDao;
+import com.mybanking.data.entity.Passport;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ import java.sql.Date;
 import java.util.List;
 
 class PassportDaoTest {
-    static Passport createEntity() {
+    static Passport createPassport() {
         Passport passport = new Passport();
         passport.setNumber("0123456789");
         passport.setName("Test");
@@ -24,7 +25,7 @@ class PassportDaoTest {
     @Test
     void find() {
         PassportDao dao = new PassportDao(DataSourceHolder.getDataSource());
-        Passport passport = createEntity();
+        Passport passport = createPassport();
 
         dao.save(passport);
 
@@ -43,7 +44,7 @@ class PassportDaoTest {
     @Test
     void operationChain() {
         PassportDao dao = new PassportDao(DataSourceHolder.getDataSource());
-        Passport passport = createEntity();
+        Passport passport = createPassport();
 
         dao.save(passport);
 
@@ -65,7 +66,7 @@ class PassportDaoTest {
     @Test
     void getAll() {
         PassportDao dao = new PassportDao(DataSourceHolder.getDataSource());
-        Passport passport = createEntity();
+        Passport passport = createPassport();
 
         dao.save(passport);
 

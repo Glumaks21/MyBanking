@@ -1,4 +1,4 @@
-package data;
+package com.mybanking.data;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 

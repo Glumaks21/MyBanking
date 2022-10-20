@@ -1,7 +1,7 @@
-package data.dao;
+package com.mybanking.data.dao;
 
-import data.entity.Client;
-import data.entity.Passport;
+import com.mybanking.data.entity.Client;
+import com.mybanking.data.entity.Passport;
 
 import javax.sql.DataSource;
 import java.sql.*;

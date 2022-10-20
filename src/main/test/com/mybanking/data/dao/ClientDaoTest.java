@@ -1,18 +1,17 @@
-package data.dao;
+package com.mybanking.data.dao;
 
-import data.DataSourceHolder;
-import data.entity.Client;
-import data.entity.Passport;
+import com.mybanking.data.DataSourceHolder;
+import com.mybanking.data.entity.Client;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
 
 class ClientDaoTest {
     static Client createClient() {
         Client client = new Client();
         client.setPhone("8800553535");
-        client.setPassport(PassportDaoTest.createEntity());
+        client.setPassport(PassportDaoTest.createPassport());
         return client;
     }
 
@@ -55,6 +54,14 @@ class ClientDaoTest {
 
     @Test
     void getAll() {
+        ClientDao dao = new ClientDao(DataSourceHolder.getDataSource());
+        Client client = createClient();
 
+        dao.save(client);
+
+        List<Client> clients = dao.getAll();
+
+        Assertions.assertTrue(clients.contains(client));
+        dao.delete(dao.findByPassport(client.getPassport()).get().getId());
     }
 }

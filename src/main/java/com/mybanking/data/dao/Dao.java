@@ -1,4 +1,4 @@
-package data.dao;
+package com.mybanking.data.dao;
 
 import java.util.List;
 import java.util.Optional;
