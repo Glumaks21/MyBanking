@@ -25,17 +25,16 @@ public class PassportServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws  IOException {
         Dao<Client> dao = new ClientSqlDao(DataSourceHolder.getDataSource());
 
-
-        Client client = new Client();
-        client.setPhone(req.getParameter("phone"));
-        Passport passport = new Passport();
-        passport.setNumber(req.getParameter("number"));
-        passport.setName(req.getParameter("name"));
-        passport.setSurname(req.getParameter("surname"));
-        passport.setPatronymic(req.getParameter("patronymic"));
-        passport.setSex(req.getParameter("sex"));
-        passport.setBirthday(Date.valueOf(req.getParameter("birthday")));
-        client.setPassport(passport);
+        Passport passport = new Passport().
+            setNumber(req.getParameter("number")).
+            setName(req.getParameter("name")).
+            setSurname(req.getParameter("surname")).
+            setPatronymic(req.getParameter("patronymic")).
+            setSex(req.getParameter("sex")).
+            setBirthday(Date.valueOf(req.getParameter("birthday")));
+        Client client = new Client().
+            setPhone(req.getParameter("phone")).
+            setPassport(passport);
 
         dao.save(client);
         resp.sendRedirect("/registration");

@@ -23,6 +23,7 @@ public class Client {
     }
 
     public Client setPassport(Passport passport) {
+        Objects.requireNonNull(passport);
         this.passport = passport;
         return this;
     }

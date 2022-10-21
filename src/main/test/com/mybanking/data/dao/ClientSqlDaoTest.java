@@ -3,46 +3,36 @@ package com.mybanking.data.dao;
 import com.mybanking.data.DataSourceHolder;
 import com.mybanking.data.entity.Client;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 class ClientSqlDaoTest {
+    private static ClientSqlDao dao = new ClientSqlDao(DataSourceHolder.getDataSource());
+
     static Client createClient() {
-        Client client = new Client();
-        client.setPhone("388800553535");
-        client.setPassport(PassportSqlDaoTest.createPassport());
-        return client;
+        return new Client().
+                setPhone("388800553535").
+                setPassport(PassportSqlDaoTest.createPassport());
     }
 
-    @Test
-    void find() {
-        ClientSqlDao dao = new ClientSqlDao(DataSourceHolder.getDataSource());
-        Client client = createClient();
-
-        dao.save(client);
-        Client expected = dao.findByPassport(client.getPassport()).get();
-        Assertions.assertEquals(expected, client);
-
-        dao.delete(expected.getId());
-        Assertions.assertTrue(dao.find(expected.getId()).isEmpty());
-    }
-
-
+    @DisplayName("All CRUD chain operations")
     @Test
     void chainOperations() {
-        ClientSqlDao dao = new ClientSqlDao(DataSourceHolder.getDataSource());
         Client client = createClient();
 
         dao.save(client);
         Client expected = dao.findByPassport(client.getPassport()).get();
         Assertions.assertEquals(expected, client);
 
-        client.setId(expected.getId());
-        client.setPhone("012345678910");
-        client.getPassport().setName("Dudya");
-        client.getPassport().setSurname("BigTestov");
-        client.getPassport().setPatronymic("Bigovoch");
+        client.
+            setId(expected.getId()).
+            setPhone("012345678910");
+        client.getPassport().
+            setName("Dudya").
+            setSurname("BigTestov").
+            setPatronymic("Bigovoch");
 
         dao.update(client);
 
@@ -55,7 +45,6 @@ class ClientSqlDaoTest {
 
     @Test
     void getAll() {
-        ClientSqlDao dao = new ClientSqlDao(DataSourceHolder.getDataSource());
         Client client = createClient();
 
         dao.save(client);

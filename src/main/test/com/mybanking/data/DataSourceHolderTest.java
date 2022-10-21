@@ -1,6 +1,5 @@
 package com.mybanking.data;
 
-import com.mybanking.data.DataSourceHolder;
 import org.junit.jupiter.api.*;
 
 import javax.sql.DataSource;

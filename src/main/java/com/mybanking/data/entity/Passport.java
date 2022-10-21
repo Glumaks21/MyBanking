@@ -2,7 +2,6 @@ package com.mybanking.data.entity;
 
 import java.sql.Date;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 public class Passport {
     private long id;

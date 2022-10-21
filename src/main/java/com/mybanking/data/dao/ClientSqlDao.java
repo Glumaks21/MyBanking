@@ -16,7 +16,11 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
     static String SQL_SELECT_BY_PASSPORT_NUMBER = "SELECT * FROM clients c " +
             "JOIN passports p ON(c.passport_id = p.id) " +
             "WHERE c.id = ?;";
-
+    
+    static String SQL_SELECT_BY_PHONE = "SELECT * FROM clients c " +
+            "JOIN passports p ON(c.passport_id = p.id) " +
+            "WHERE c.phone = ?;";
+    
     static String SQL_INSERT = "INSERT INTO clients(passport_id, phone) " +
             "VALUES ((SELECT id FROM passports WHERE number = ?), ?);";
 
@@ -31,24 +35,6 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
 
     public ClientSqlDao(DataSource dataSource) {
         super(dataSource);
-    }
-
-    public Optional<Client> findByPassport(Passport passport) {
-        try (Connection connection = getDataSource().getConnection()) {
-            Client client = null;
-
-            PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_ID);
-            statement.setString(1, passport.getNumber());
-
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                client = mapToClient(resultSet);
-            }
-
-            return Optional.ofNullable(client);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -70,6 +56,42 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
         }
     }
 
+    public Optional<Client> findByPassport(Passport passport) {
+        try (Connection connection = getDataSource().getConnection()) {
+            Client client = null;
+
+            PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_ID);
+            statement.setString(1, passport.getNumber());
+
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                client = mapToClient(resultSet);
+            }
+
+            return Optional.ofNullable(client);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<Client> findByPhone(String phone) {
+        try (Connection connection = getDataSource().getConnection()) {
+            Client client = null;
+
+            PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_PHONE);
+            statement.setString(1, phone);
+
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                client = mapToClient(resultSet);
+            }
+
+            return Optional.ofNullable(client);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     @Override
     public void save(Client client) {
         Connection connection = null;
@@ -213,7 +235,7 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
         }
     }
 
-    private Client mapToClient(ResultSet resultSet) throws SQLException {
+     static  Client mapToClient(ResultSet resultSet) throws SQLException {
         Passport passport = PassportSqlDao.mapToPassport(resultSet).
                 setId(resultSet.getLong("passport_id"));
         return  new Client().
