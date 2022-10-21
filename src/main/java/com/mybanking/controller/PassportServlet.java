@@ -1,9 +1,8 @@
 package com.mybanking.controller;
 
 import com.mybanking.data.DataSourceHolder;
-import com.mybanking.data.dao.ClientDao;
+import com.mybanking.data.dao.ClientSqlDao;
 import com.mybanking.data.dao.Dao;
-import com.mybanking.data.dao.PassportDao;
 import com.mybanking.data.entity.Client;
 import com.mybanking.data.entity.Passport;
 
@@ -24,7 +23,7 @@ public class PassportServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws  IOException {
-        Dao<Client> dao = new ClientDao(DataSourceHolder.getDataSource());
+        Dao<Client> dao = new ClientSqlDao(DataSourceHolder.getDataSource());
 
 
         Client client = new Client();

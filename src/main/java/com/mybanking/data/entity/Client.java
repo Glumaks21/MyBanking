@@ -11,24 +11,31 @@ public class Client {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public Client setId(long id) {
+        if (id > 0) {
+            this.id = id;
+        }
+        return this;
     }
 
     public Passport getPassport() {
         return passport;
     }
 
-    public void setPassport(Passport passport) {
+    public Client setPassport(Passport passport) {
         this.passport = passport;
+        return this;
     }
 
     public String getPhone() {
         return phone;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public Client setPhone(String phone) {
+        if (phone.matches("\\d{12}")) {
+            this.phone = phone;
+        }
+        return this;
     }
 
     @Override

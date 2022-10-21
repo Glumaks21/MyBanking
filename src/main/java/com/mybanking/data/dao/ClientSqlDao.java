@@ -8,7 +8,7 @@ import java.sql.*;
 import java.util.*;
 
 
-public class ClientDao implements Dao<Client> {
+public class ClientSqlDao extends AbstractSqlDao<Client> {
     static String SQL_SELECT_BY_ID = "SELECT * FROM clients c " +
             "JOIN passports p ON (c.passport_id = p.id) " +
             "WHERE p.number = ?;";
@@ -20,22 +20,21 @@ public class ClientDao implements Dao<Client> {
     static String SQL_INSERT = "INSERT INTO clients(passport_id, phone) " +
             "VALUES ((SELECT id FROM passports WHERE number = ?), ?);";
 
-    static String SQL_UPDATE_BY_ID = "UPDATE clients SET phone = ? WHERE id=?;";
+    static String SQL_UPDATE_BY_ID = "UPDATE clients SET phone = ? WHERE id = ?;";
 
+    static String SQL_SELECT_PASSPORT_ID_BY_ID = "SELECT passport_id FROM clients WHERE id = ?;";
+    
     static String SQL_DELETE = "DELETE FROM clients WHERE id = ?;";
     
     static String SQL_SELECT_ALL = "SELECT * FROM clients c " +
             "JOIN passports p ON(c.passport_id = p.id);";
 
-    private final DataSource dataSource;
-
-    public ClientDao(DataSource dataSource) {
-        Objects.requireNonNull(dataSource);
-        this.dataSource = dataSource;
+    public ClientSqlDao(DataSource dataSource) {
+        super(dataSource);
     }
 
     public Optional<Client> findByPassport(Passport passport) {
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = getDataSource().getConnection()) {
             Client client = null;
 
             PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_ID);
@@ -54,7 +53,7 @@ public class ClientDao implements Dao<Client> {
 
     @Override
     public Optional<Client> find(long id) {
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = getDataSource().getConnection()) {
             Client client = null;
 
             PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_PASSPORT_NUMBER);
@@ -75,24 +74,27 @@ public class ClientDao implements Dao<Client> {
     public void save(Client client) {
         Connection connection = null;
         try {
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
             connection.setAutoCommit(false);
 
-            PreparedStatement statement = connection.prepareStatement(PassportDao.SQL_INSERT);
             Passport clientPassport = client.getPassport();
-            statement.setString(1, clientPassport.getNumber());
-            statement.setString(2, clientPassport.getName());
-            statement.setString(3, clientPassport.getSurname());
-            statement.setString(4, clientPassport.getPatronymic());
-            statement.setString(5, clientPassport.getSex());
-            statement.setDate(6, clientPassport.getBirthday());
+
+            PreparedStatement statement = connection.prepareStatement(PassportSqlDao.SQL_INSERT);
+            fillStatement(statement,
+                    clientPassport.getNumber(),
+                    clientPassport.getName(),
+                    clientPassport.getSurname(),
+                    clientPassport.getPatronymic(),
+                    clientPassport.getSex(),
+                    clientPassport.getBirthday());
 
             statement.execute();
 
             statement = connection.prepareStatement(SQL_INSERT);
-            statement.setString(1, clientPassport.getNumber());
-            statement.setString(2, client.getPhone());
-
+            fillStatement(statement,
+                    clientPassport.getNumber(),
+                    client.getPhone());
+            
             statement.execute();
 
             connection.commit();
@@ -111,30 +113,33 @@ public class ClientDao implements Dao<Client> {
     }
 
     @Override
-    public void update(long id, Client client) {
+
+    public void update(Client client) {
         Connection connection = null;
         try {
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
             connection.setAutoCommit(false);
 
             PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_BY_ID);
-            statement.setString(1, client.getPhone());
-            statement.setLong(2, id);
+            fillStatement(statement,  client.getPhone(), client.getId());
 
             statement.execute();
 
-            PassportDao dao = new PassportDao(dataSource);
             Passport clientPassport = client.getPassport();
-            Passport dbPassport = dao.findByNumber(clientPassport.getNumber()).get();
-
-            statement = connection.prepareStatement(PassportDao.SQL_UPDATE_BY_ID);
-            statement.setString(1, clientPassport.getNumber());
-            statement.setString(2, clientPassport.getName());
-            statement.setString(3, clientPassport.getSurname());
-            statement.setString(4, clientPassport.getPatronymic());
-            statement.setString(5, clientPassport.getSex());
-            statement.setDate(6, clientPassport.getBirthday());
-            statement.setLong(7, dbPassport.getId());
+            
+            String sqlQuery = PassportSqlDao.SQL_UPDATE_BY_ID;
+            sqlQuery = sqlQuery.replace("id = ?",
+                    "id = " + createSubquery(SQL_SELECT_PASSPORT_ID_BY_ID));
+            
+            statement = connection.prepareStatement(sqlQuery);
+            fillStatement(statement,
+                    clientPassport.getNumber(),
+                    clientPassport.getName(),
+                    clientPassport.getSurname(),
+                    clientPassport.getPatronymic(),
+                    clientPassport.getSex(),
+                    clientPassport.getBirthday(),
+                    client.getId());
 
             statement.execute();
 
@@ -164,14 +169,14 @@ public class ClientDao implements Dao<Client> {
         Client client = dbClient.get();
         Connection connection = null;
         try {
-            connection = dataSource.getConnection();
+            connection = getDataSource().getConnection();
             connection.setAutoCommit(false);
 
             PreparedStatement statement = connection.prepareStatement(SQL_DELETE);
             statement.setLong(1, id);
             statement.execute();
 
-            statement = connection.prepareStatement(PassportDao.SQL_DELETE_BY_ID);
+            statement = connection.prepareStatement(PassportSqlDao.SQL_DELETE_BY_ID);
             statement.setLong(1, client.getPassport().getId());
             statement.execute();
 
@@ -192,7 +197,7 @@ public class ClientDao implements Dao<Client> {
 
     @Override
     public List<Client> getAll() {
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = getDataSource().getConnection()) {
             List<Client> clients = new ArrayList<>();
 
             Statement statement = connection.createStatement();
@@ -209,12 +214,11 @@ public class ClientDao implements Dao<Client> {
     }
 
     private Client mapToClient(ResultSet resultSet) throws SQLException {
-        Client client = new Client();
-        client.setId(resultSet.getLong("id"));
-        Passport passport = PassportDao.mapToPassport(resultSet);
-        passport.setId(resultSet.getLong("passport_id"));
-        client.setPassport(passport);
-        client.setPhone(resultSet.getString("phone"));
-        return client;
+        Passport passport = PassportSqlDao.mapToPassport(resultSet).
+                setId(resultSet.getLong("passport_id"));
+        return  new Client().
+                setId(resultSet.getLong("id")).
+                setPassport(passport).
+                setPhone(resultSet.getString("phone"));
     }
 }

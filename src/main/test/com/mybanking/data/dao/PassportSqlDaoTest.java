@@ -1,7 +1,6 @@
 package com.mybanking.data.dao;
 
 import com.mybanking.data.DataSourceHolder;
-import com.mybanking.data.dao.PassportDao;
 import com.mybanking.data.entity.Passport;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Date;
 import java.util.List;
 
-class PassportDaoTest {
+class PassportSqlDaoTest {
     static Passport createPassport() {
         Passport passport = new Passport();
         passport.setNumber("0123456789");
@@ -24,7 +23,7 @@ class PassportDaoTest {
 
     @Test
     void find() {
-        PassportDao dao = new PassportDao(DataSourceHolder.getDataSource());
+        PassportSqlDao dao = new PassportSqlDao(DataSourceHolder.getDataSource());
         Passport passport = createPassport();
 
         dao.save(passport);
@@ -43,7 +42,7 @@ class PassportDaoTest {
     @DisplayName("All CRUD chain operations")
     @Test
     void operationChain() {
-        PassportDao dao = new PassportDao(DataSourceHolder.getDataSource());
+        PassportSqlDao dao = new PassportSqlDao(DataSourceHolder.getDataSource());
         Passport passport = createPassport();
 
         dao.save(passport);
@@ -51,21 +50,22 @@ class PassportDaoTest {
         Passport expected = dao.findByNumber(passport.getNumber()).get();
         Assertions.assertEquals(expected, passport);
 
+        passport.setId(expected.getId());
         passport.setName("Dudya");
         passport.setSurname("BigTestov");
         passport.setPatronymic("Bigovoch");
-        dao.update(expected.getId(), passport);
+        dao.update(passport);
 
-        expected = dao.findByNumber(passport.getNumber()).get();
+        expected = dao.find(passport.getId()).get();
         Assertions.assertEquals(expected, passport);
 
-        dao.delete(expected.getId());
+        dao.delete(passport.getId());
         Assertions.assertTrue(dao.findByNumber(passport.getNumber()).isEmpty());
     }
 
     @Test
     void getAll() {
-        PassportDao dao = new PassportDao(DataSourceHolder.getDataSource());
+        PassportSqlDao dao = new PassportSqlDao(DataSourceHolder.getDataSource());
         Passport passport = createPassport();
 
         dao.save(passport);

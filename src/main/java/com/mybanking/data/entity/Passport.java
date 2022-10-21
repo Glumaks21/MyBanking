@@ -2,6 +2,7 @@ package com.mybanking.data.entity;
 
 import java.sql.Date;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class Passport {
     private long id;
@@ -16,56 +17,78 @@ public class Passport {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public Passport setId(long id) {
+        if (id > 0) {
+            this.id = id;
+        }
+        return this;
     }
 
     public String getNumber() {
         return number;
     }
 
-    public void setNumber(String number) {
-        this.number = number;
+    public Passport setNumber(String number) {
+        if (number.matches("\\d{10}")) {
+            this.number = number;
+        }
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public Passport setName(String name) {
+        name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+        if (name.matches("\\w{1,20}")) {
+            this.name = name;
+        }
+        return this;
     }
 
     public String getSurname() {
         return surname;
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
+    public Passport setSurname(String surname) {
+        surname = surname.substring(0, 1).toUpperCase() + surname.substring(1).toLowerCase();
+        if (surname.matches("\\w{1,20}")) {
+            this.surname = surname;
+        }
+        return this;
     }
 
     public String getPatronymic() {
         return patronymic;
     }
 
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
+    public Passport setPatronymic(String patronymic) {
+        patronymic = patronymic.substring(0, 1).toUpperCase() + patronymic.substring(1).toLowerCase();
+        if (patronymic.matches("\\w{1,20}")) {
+            this.patronymic = surname;
+        }
+        return this;
     }
 
     public String getSex() {
         return sex;
     }
 
-    public void setSex(String sex) {
-        this.sex = sex;
+    public Passport setSex(String sex) {
+        if (sex.matches("(male)|(female)")) {
+            this.sex = sex;
+        }
+        return this;
     }
 
     public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public Passport setBirthday(Date birthday) {
         this.birthday = birthday;
+        return this;
     }
 
     @Override
