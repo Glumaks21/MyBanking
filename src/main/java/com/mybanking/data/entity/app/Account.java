@@ -1,8 +1,10 @@
-package com.mybanking.data.entity;
+package com.mybanking.data.entity.app;
+
+import com.mybanking.data.entity.Client;
 
 import java.util.Objects;
 
-public class AppAccount {
+public class Account {
     private long id;
     private Client client;
     private String email;
@@ -11,7 +13,7 @@ public class AppAccount {
         return id;
     }
 
-    public AppAccount setId(long id) {
+    public Account setId(long id) {
         if (id > 0) {
             this.id = id;
         }
@@ -22,7 +24,7 @@ public class AppAccount {
         return client;
     }
 
-    public AppAccount setClient(Client client) {
+    public Account setClient(Client client) {
         Objects.requireNonNull(client);
         this.client = client;
         return this;
@@ -32,8 +34,7 @@ public class AppAccount {
         return email;
     }
 
-    public AppAccount setEmail(String email) {
-        //add pattern
+    public Account setEmail(String email) {
         this.email = email;
         return this;
     }
@@ -42,7 +43,7 @@ public class AppAccount {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AppAccount account = (AppAccount) o;
+        Account account = (Account) o;
         return Objects.equals(client, account.client) && Objects.equals(email, account.email);
     }
 

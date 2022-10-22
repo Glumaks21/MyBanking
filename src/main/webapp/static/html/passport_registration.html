@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="static/css/styles.css" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Enter passport info</h1>
+    <fieldset>
+        <label>
+            <input class="required" type="text" minlength="10" maxlength="10" name="number" placeholder="Number" required>
+        </label>
+        <label>
+            <input class="required" type="text" name="name" placeholder="Name" maxlength="20" required>
+        </label>
+        <label>
+            <input class="required" type="text" name="surname" placeholder="Surname" maxlength="20" required>
+        </label>
+        <label>
+            <input class="required" type="text" name="patronymic" placeholder="Patronymic" maxlength="25" required>
+        </label>
+    </fieldset>
+    <fieldset>
+        <label>
+            Male <input  type="radio" name="sex" value="male" required>
+            Female <input type="radio" name="sex" value="female" required>
+        </label>
+        <label>
+            <input type="date" name="birthday" placeholder="Birthday" required>
+        </label>
+    </fieldset>
+</body>
+</html>

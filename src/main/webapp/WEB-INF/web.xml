@@ -4,6 +4,16 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
    http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
 
+    <servlet>
+        <servlet-name>AccountPage</servlet-name>
+        <jsp-file>/account_page.jsp</jsp-file>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AccountPage</servlet-name>
+        <url-pattern>/account</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>default</servlet-name>
         <url-pattern>/static/*</url-pattern>

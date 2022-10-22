@@ -1,9 +1,7 @@
 package com.mybanking.data.dao;
 
-import com.mybanking.data.entity.AppAccount;
+import com.mybanking.data.entity.app.Account;
 import com.mybanking.data.entity.Client;
-import com.mybanking.data.entity.Passport;
-import com.mysql.cj.x.protobuf.MysqlxCrud;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -11,16 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class AppAccountSqlDao extends AbstractSqlDao<AppAccount> {
+public class AppAccountSqlDao extends AbstractSqlDao<Account> {
     static String SQL_SELECT_BY_ID = "SELECT * FROM app_accounts ac " +
             "JOIN clients c ON(ac.client_id = c.id) " +
             "JOIN passports p ON(c.passport_id = p.id)" +
             "WHERE ac.id = ?;";
 
-    static String SQL_SELECT_BY_CLIENT_ID = "SELECT * FROM app_accounts ac " +
+    static String SQL_SELECT_BY_PHONE = "SELECT * FROM app_accounts ac " +
             "JOIN clients c ON(ac.client_id = c.id) " +
-            "JOIN passports p ON(c.passport_id = p.id) " +
-            "WHERE ac.client_id = ?;";
+            "JOIN passports p ON(c.passport_id = p.id)" +
+            "WHERE c.phone = ?;";
 
     static String SQL_INSERT = "INSERT INTO app_accounts(client_id, email) " +
             "VALUES ((SELECT c.id FROM clients c " +
@@ -40,9 +38,9 @@ public class AppAccountSqlDao extends AbstractSqlDao<AppAccount> {
     }
 
     @Override
-    public Optional<AppAccount> find(long id) {
+    public Optional<Account> find(long id) {
         try (Connection connection = getDataSource().getConnection()) {
-            AppAccount account = null;
+            Account account = null;
 
             PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_ID);
             fillStatement(statement, id);
@@ -58,13 +56,12 @@ public class AppAccountSqlDao extends AbstractSqlDao<AppAccount> {
         }
     }
 
-    public Optional<AppAccount> findByClient(Client client) {
+    public Optional<Account> findByPhone(String phone) {
         try (Connection connection = getDataSource().getConnection()) {
-            AppAccount account = null;
+            Account account = null;
 
-            String sqlQuery = SQL_SELECT_BY_CLIENT_ID.replace("ac.client_id = ?", "c.phone = ?");
-            PreparedStatement statement = connection.prepareStatement(sqlQuery);
-            fillStatement(statement, client.getPhone());
+            PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_PHONE);
+            fillStatement(statement, phone);
 
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -78,7 +75,7 @@ public class AppAccountSqlDao extends AbstractSqlDao<AppAccount> {
     }
 
     @Override
-    public void save(AppAccount account) {
+    public void save(Account account) {
         Connection connection = null;
         try {
             connection = getDataSource().getConnection();
@@ -106,7 +103,7 @@ public class AppAccountSqlDao extends AbstractSqlDao<AppAccount> {
     }
 
     @Override
-    public void update(AppAccount account) {
+    public void update(Account account) {
         Connection connection = null;
         try {
             connection = getDataSource().getConnection();
@@ -161,9 +158,9 @@ public class AppAccountSqlDao extends AbstractSqlDao<AppAccount> {
     }
 
     @Override
-    public List<AppAccount> getAll() {
+    public List<Account> getAll() {
         try (Connection connection = getDataSource().getConnection()) {
-            List<AppAccount> accounts = new ArrayList<>();
+            List<Account> accounts = new ArrayList<>();
             Statement statement = connection.createStatement();
 
             ResultSet resultSet = statement.executeQuery(SQL_SELECT_ALL);
@@ -177,10 +174,10 @@ public class AppAccountSqlDao extends AbstractSqlDao<AppAccount> {
         }
     }
 
-    private static AppAccount mapToAppAccount(ResultSet resultSet) throws SQLException {
+    private static Account mapToAppAccount(ResultSet resultSet) throws SQLException {
         Client client = ClientSqlDao.mapToClient(resultSet).
                 setId(resultSet.getLong("client_id"));
-        return new AppAccount().setId(resultSet.getLong("id")).
+        return new Account().setId(resultSet.getLong("id")).
                 setClient(client).
                 setEmail(resultSet.getString("email"));
     }
