@@ -18,14 +18,8 @@ public class HomeServlet extends HttpServlet {
             return;
         }
 
-        Cookie[] cookies = req.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("account")) {
-                    req.getRequestDispatcher("/account").forward(req, resp);
-                    return;
-                }
-            }
+        if (req.getSession(false) != null) {
+            req.getRequestDispatcher("/enter").forward(req, resp);
         }
 
         req.getRequestDispatcher("/static/html/homepage.html").forward(req, resp);

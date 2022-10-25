@@ -1,16 +1,22 @@
 package com.mybanking.data.dao;
 
 import com.mybanking.data.DataSourceHolder;
+
+import com.mybanking.data.dao.client.PassportSqlDao;
 import com.mybanking.data.entity.Passport;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.*;
 
 import java.sql.Date;
 import java.util.List;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PassportSqlDaoTest {
-    static Passport createPassport() {
+    private static Passport passport;
+    private static PassportSqlDao dao;
+
+    public static Passport createPassport() {
         Passport passport = new Passport();
         passport.setNumber("0123456789");
         passport.setName("Test");
@@ -21,58 +27,51 @@ class PassportSqlDaoTest {
         return passport;
     }
 
-    @Test
-    void find() {
-        PassportSqlDao dao = new PassportSqlDao(DataSourceHolder.getDataSource());
-        Passport passport = createPassport();
-
-        dao.save(passport);
-
-        Passport expectedByNumber = dao.findByNumber(passport.getNumber()).get();
-        Passport expectedById = dao.find(expectedByNumber.getId()).get();
-
-        Assertions.assertEquals(passport, expectedByNumber);
-        Assertions.assertEquals(passport, expectedById);
-        Assertions.assertEquals(expectedByNumber, expectedById);
-
-        dao.delete(expectedById.getId());
-        Assertions.assertTrue(dao.find(expectedById.getId()).isEmpty());
+    @BeforeAll
+    static void init() {
+        dao = new PassportSqlDao(DataSourceHolder.getDataSource());
+        passport = createPassport();
     }
 
-    @DisplayName("All CRUD chain operations")
+    @Order(1)
     @Test
-    void operationChain() {
-        PassportSqlDao dao = new PassportSqlDao(DataSourceHolder.getDataSource());
-        Passport passport = createPassport();
-
+    public void save() {
         dao.save(passport);
+    }
 
+    @Order(2)
+    @Test
+    public void find() {
         Passport expected = dao.findByNumber(passport.getNumber()).get();
-        Assertions.assertEquals(expected, passport);
+        assertEquals(expected, passport);
+        passport = expected;
+    }
 
-        passport.setId(expected.getId());
+    @Order(3)
+    @Test
+    public void update() {
         passport.setName("Dudya");
         passport.setSurname("BigTestov");
         passport.setPatronymic("Bigovoch");
         dao.update(passport);
-
-        expected = dao.find(passport.getId()).get();
-        Assertions.assertEquals(expected, passport);
-
+        Passport expected = dao.findByNumber(passport.getNumber()).get();
+        assertEquals(expected, passport);
+    }
+    @Order(4)
+    @Test
+    public void delete() {
         dao.delete(passport.getId());
-        Assertions.assertTrue(dao.findByNumber(passport.getNumber()).isEmpty());
+        assertTrue(dao.findByNumber(passport.getNumber()).isEmpty());
     }
 
+    @Order(5)
     @Test
-    void getAll() {
-        PassportSqlDao dao = new PassportSqlDao(DataSourceHolder.getDataSource());
-        Passport passport = createPassport();
-
+    public void getAll() {
         dao.save(passport);
 
         List<Passport> passports = dao.getAll();
 
-        Assertions.assertTrue(passports.contains(passport));
+        assertTrue(passports.contains(passport));
         dao.findByNumber(passport.getNumber()).
                 ifPresent(inDb -> dao.delete(inDb.getId()));
     }

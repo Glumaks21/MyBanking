@@ -1,5 +1,6 @@
-package com.mybanking.data.dao;
+package com.mybanking.data.dao.client;
 
+import com.mybanking.data.dao.AbstractSqlDao;
 import com.mybanking.data.entity.Passport;
 
 import javax.sql.DataSource;
@@ -30,8 +31,8 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
 
     public Optional<Passport> findByNumber(String number) {
         Passport passport = null;
-        try (Connection connection = getDataSource().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_NUMBER);
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_NUMBER)) {
             statement.setString(1, number);
 
             ResultSet resultSet = statement.executeQuery();
@@ -79,21 +80,12 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
                     passport.getPatronymic(),
                     passport.getSex(),
                     passport.getBirthday());
-
-
             statement.execute();
 
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.setAutoCommit(true);
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            tryToRollBack(connection);
             throw new RuntimeException(e);
         }
     }
@@ -114,20 +106,12 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
                     passport.getSex(),
                     passport.getBirthday(),
                     passport.getId());
-
             statement.execute();
 
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.setAutoCommit(true);
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            tryToRollBack(connection);
             throw new RuntimeException(e);
         }
     }
@@ -140,19 +124,13 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
             connection.setAutoCommit(false);
 
             PreparedStatement statement = connection.prepareStatement(SQL_DELETE_BY_ID);
-            statement.setLong(1, id);
-
+            fillStatement(statement, id);
             statement.execute();
+
             connection.commit();
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.setAutoCommit(true);
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            tryToRollBack(connection);
             throw new RuntimeException(e);
         }
     }
@@ -174,7 +152,7 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
         }
     }
 
-    static Passport mapToPassport(ResultSet resultSet) throws SQLException {
+    public static Passport mapToPassport(ResultSet resultSet) throws SQLException {
         return new Passport().
                 setId(resultSet.getLong("id")).
                 setNumber(resultSet.getString("number")).

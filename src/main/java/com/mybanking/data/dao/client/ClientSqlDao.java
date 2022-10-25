@@ -1,5 +1,7 @@
-package com.mybanking.data.dao;
+package com.mybanking.data.dao.client;
 
+import com.mybanking.data.dao.AbstractSqlDao;
+import com.mybanking.data.dao.client.PassportSqlDao;
 import com.mybanking.data.entity.Client;
 import com.mybanking.data.entity.Passport;
 
@@ -10,28 +12,26 @@ import java.util.*;
 
 public class ClientSqlDao extends AbstractSqlDao<Client> {
     static String SQL_SELECT_BY_ID = "SELECT * FROM clients c " +
-            "JOIN passports p ON (c.passport_id = p.id) " +
-            "WHERE p.number = ?;";
+            "LEFT OUTER JOIN passports p ON (c.passport_id = p.id) " +
+            "WHERE c.id = ?;";
 
     static String SQL_SELECT_BY_PASSPORT_NUMBER = "SELECT * FROM clients c " +
-            "JOIN passports p ON(c.passport_id = p.id) " +
-            "WHERE c.id = ?;";
+            "LEFT OUTER JOIN passports p ON(c.passport_id = p.id) " +
+            "WHERE p.number = ?;";
     
     static String SQL_SELECT_BY_PHONE = "SELECT * FROM clients c " +
-            "JOIN passports p ON(c.passport_id = p.id) " +
+            "LEFT OUTER JOIN passports p ON(c.passport_id = p.id) " +
             "WHERE c.phone = ?;";
     
     static String SQL_INSERT = "INSERT INTO clients(passport_id, phone) " +
-            "VALUES ((SELECT id FROM passports WHERE number = ?), ?);";
+            "VALUES (?, ?);";
 
-    static String SQL_UPDATE_BY_ID = "UPDATE clients SET phone = ? WHERE id = ?;";
-
-    static String SQL_SELECT_PASSPORT_ID_BY_ID = "SELECT passport_id FROM clients WHERE id = ?;";
+    static String SQL_UPDATE_BY_ID = "UPDATE clients SET passport_id = ?, phone = ? WHERE id = ?;";
     
     static String SQL_DELETE = "DELETE FROM clients WHERE id = ?;";
     
     static String SQL_SELECT_ALL = "SELECT * FROM clients c " +
-            "JOIN passports p ON(c.passport_id = p.id);";
+            "LEFT OUTER JOIN passports p ON(c.passport_id = p.id);";
 
     public ClientSqlDao(DataSource dataSource) {
         super(dataSource);
@@ -39,13 +39,13 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
 
     @Override
     public Optional<Client> find(long id) {
-        try (Connection connection = getDataSource().getConnection()) {
-            Client client = null;
-
-            PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_PASSPORT_NUMBER);
-            statement.setLong(1, id);
+        Client client = null;
+        try (Connection connection = getDataSource().getConnection();
+            PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_ID)) {
+            fillStatement(statement, id);
 
             ResultSet resultSet = statement.executeQuery();
+            System.out.println(statement);
             if (resultSet.next()) {
                 client = mapToClient(resultSet);
             }
@@ -57,13 +57,13 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
     }
 
     public Optional<Client> findByPassport(Passport passport) {
-        try (Connection connection = getDataSource().getConnection()) {
-            Client client = null;
-
-            PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_ID);
-            statement.setString(1, passport.getNumber());
+        Client client = null;
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_PASSPORT_NUMBER)) {
+            fillStatement(statement, passport.getNumber());
 
             ResultSet resultSet = statement.executeQuery();
+            System.out.println(statement);
             if (resultSet.next()) {
                 client = mapToClient(resultSet);
             }
@@ -75,13 +75,13 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
     }
 
     public Optional<Client> findByPhone(String phone) {
-        try (Connection connection = getDataSource().getConnection()) {
-            Client client = null;
-
-            PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_PHONE);
-            statement.setString(1, phone);
-
+        Client client = null;
+        try (Connection connection = getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_PHONE)) {
+            fillStatement(statement, phone);
+            
             ResultSet resultSet = statement.executeQuery();
+            System.out.println(statement);
             if (resultSet.next()) {
                 client = mapToClient(resultSet);
             }
@@ -95,26 +95,15 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
     @Override
     public void save(Client client) {
         Connection connection = null;
+        PreparedStatement statement = null;
+
         try {
             connection = getDataSource().getConnection();
             connection.setAutoCommit(false);
 
-            Passport clientPassport = client.getPassport();
-
-            PreparedStatement statement = connection.prepareStatement(PassportSqlDao.SQL_INSERT);
-            fillStatement(statement,
-                    clientPassport.getNumber(),
-                    clientPassport.getName(),
-                    clientPassport.getSurname(),
-                    clientPassport.getPatronymic(),
-                    clientPassport.getSex(),
-                    clientPassport.getBirthday());
-
-            statement.execute();
-
             statement = connection.prepareStatement(SQL_INSERT);
             fillStatement(statement,
-                    clientPassport.getNumber(),
+                    client.getPassport().getId(),
                     client.getPhone());
             
             statement.execute();
@@ -122,16 +111,9 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.setAutoCommit(true);
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            tryToRollBack(connection);
             throw new RuntimeException(e);
-        }
+        } 
     }
 
     @Override
@@ -143,24 +125,9 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
             connection.setAutoCommit(false);
 
             PreparedStatement statement = connection.prepareStatement(SQL_UPDATE_BY_ID);
-            fillStatement(statement,  client.getPhone(), client.getId());
-
-            statement.execute();
-
-            Passport clientPassport = client.getPassport();
-            
-            String sqlQuery = PassportSqlDao.SQL_UPDATE_BY_ID;
-            sqlQuery = sqlQuery.replace("id = ?",
-                    "id = " + createSubquery(SQL_SELECT_PASSPORT_ID_BY_ID));
-            
-            statement = connection.prepareStatement(sqlQuery);
             fillStatement(statement,
-                    clientPassport.getNumber(),
-                    clientPassport.getName(),
-                    clientPassport.getSurname(),
-                    clientPassport.getPatronymic(),
-                    clientPassport.getSex(),
-                    clientPassport.getBirthday(),
+                    client.getPassport().getId(),
+                    client.getPhone(),
                     client.getId());
 
             statement.execute();
@@ -168,61 +135,35 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.setAutoCommit(true);
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            tryToRollBack(connection);
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public void delete(long id) {
-        Optional<Client> dbClient = find(id);
-
-        if (dbClient.isEmpty()) {
-            return;
-        }
-
-        Client client = dbClient.get();
         Connection connection = null;
         try {
             connection = getDataSource().getConnection();
             connection.setAutoCommit(false);
 
             PreparedStatement statement = connection.prepareStatement(SQL_DELETE);
-            statement.setLong(1, id);
-            statement.execute();
-
-            statement = connection.prepareStatement(PassportSqlDao.SQL_DELETE_BY_ID);
-            statement.setLong(1, client.getPassport().getId());
+            fillStatement(statement, id);
             statement.execute();
 
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                    connection.setAutoCommit(true);
-                }
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
+            tryToRollBack(connection);
             throw new RuntimeException(e);
         } 
     }
 
     @Override
     public List<Client> getAll() {
-        try (Connection connection = getDataSource().getConnection()) {
-            List<Client> clients = new ArrayList<>();
-
-            Statement statement = connection.createStatement();
+        List<Client> clients = new ArrayList<>();
+        try (Connection connection = getDataSource().getConnection();
+             Statement statement = connection.createStatement()) {
 
             ResultSet resultSet = statement.executeQuery(SQL_SELECT_ALL);
             while (resultSet.next()) {
@@ -235,7 +176,7 @@ public class ClientSqlDao extends AbstractSqlDao<Client> {
         }
     }
 
-     static  Client mapToClient(ResultSet resultSet) throws SQLException {
+     public static  Client mapToClient(ResultSet resultSet) throws SQLException {
         Passport passport = PassportSqlDao.mapToPassport(resultSet).
                 setId(resultSet.getLong("passport_id"));
         return  new Client().

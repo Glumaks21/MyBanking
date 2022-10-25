@@ -1,5 +1,6 @@
-package com.mybanking.data.dao;
+package com.mybanking.data.dao.app;
 
+import com.mybanking.data.dao.AbstractSqlDao;
 import com.mybanking.data.entity.app.PasswordHash;
 
 import javax.sql.DataSource;

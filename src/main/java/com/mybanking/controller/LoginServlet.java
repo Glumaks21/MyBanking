@@ -2,8 +2,8 @@ package com.mybanking.controller;
 
 import com.mybanking.controller.security.HashHelper;
 import com.mybanking.data.DataSourceHolder;
-import com.mybanking.data.dao.AppAccountSqlDao;
-import com.mybanking.data.dao.PasswordHashesSqlDao;
+import com.mybanking.data.dao.app.AppAccountSqlDao;
+import com.mybanking.data.dao.app.PasswordHashesSqlDao;
 import com.mybanking.data.entity.app.Account;
 import com.mybanking.data.entity.app.PasswordHash;
 
@@ -27,8 +27,7 @@ public class LoginServlet extends HttpServlet {
 
         String genHash = HashHelper.getSHA512SecurePassword(password, "salt");
         if (passwordHash.getHash().equals(genHash)) {
-            Cookie cookie = new Cookie("account", Long.toString(account.getId()));
-            resp.addCookie(cookie);
+            req.getSession();
         }
 
         resp.sendRedirect("/");

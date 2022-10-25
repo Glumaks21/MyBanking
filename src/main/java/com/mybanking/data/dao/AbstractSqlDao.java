@@ -4,8 +4,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,7 +32,18 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
         }
     }
 
-    protected String createSubquery(String sqlQuery) {
-        return "(" + sqlQuery.replace(";", ")");
+    protected void tryToRollBack(Connection connection) {
+        try {
+            if (connection != null && connection.isValid(1)) {
+                connection.rollback();
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    protected void doInTransaction() {
+
     }
 }

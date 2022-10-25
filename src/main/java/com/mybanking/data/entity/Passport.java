@@ -17,9 +17,7 @@ public class Passport {
     }
 
     public Passport setId(long id) {
-        if (id > 0) {
-            this.id = id;
-        }
+        this.id = id;
         return this;
     }
 
@@ -28,9 +26,7 @@ public class Passport {
     }
 
     public Passport setNumber(String number) {
-        if (number.matches("\\d{10}")) {
-            this.number = number;
-        }
+        this.number = number;
         return this;
     }
 
@@ -39,10 +35,7 @@ public class Passport {
     }
 
     public Passport setName(String name) {
-        name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-        if (name.matches("\\w{1,20}")) {
-            this.name = name;
-        }
+        this.name = name;
         return this;
     }
 
@@ -51,10 +44,7 @@ public class Passport {
     }
 
     public Passport setSurname(String surname) {
-        surname = surname.substring(0, 1).toUpperCase() + surname.substring(1).toLowerCase();
-        if (surname.matches("\\w{1,20}")) {
-            this.surname = surname;
-        }
+        this.surname = surname;
         return this;
     }
 
@@ -63,10 +53,7 @@ public class Passport {
     }
 
     public Passport setPatronymic(String patronymic) {
-        patronymic = patronymic.substring(0, 1).toUpperCase() + patronymic.substring(1).toLowerCase();
-        if (patronymic.matches("\\w{1,20}")) {
-            this.patronymic = surname;
-        }
+        this.patronymic = surname;
         return this;
     }
 
@@ -75,9 +62,7 @@ public class Passport {
     }
 
     public Passport setSex(String sex) {
-        if (sex.matches("(male)|(female)")) {
-            this.sex = sex;
-        }
+        this.sex = sex;
         return this;
     }
 

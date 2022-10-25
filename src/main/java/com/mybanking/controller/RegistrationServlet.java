@@ -1,9 +1,9 @@
 package com.mybanking.controller;
 
 import com.mybanking.data.DataSourceHolder;
-import com.mybanking.data.dao.PasswordHashesSqlDao;
-import com.mybanking.data.dao.AppAccountSqlDao;
-import com.mybanking.data.dao.ClientSqlDao;
+import com.mybanking.data.dao.app.PasswordHashesSqlDao;
+import com.mybanking.data.dao.app.AppAccountSqlDao;
+import com.mybanking.data.dao.client.ClientSqlDao;
 import com.mybanking.data.entity.Client;
 import com.mybanking.data.entity.app.Account;
 import com.mybanking.data.entity.app.PasswordHash;
@@ -14,7 +14,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Optional;
 

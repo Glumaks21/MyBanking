@@ -1,5 +1,7 @@
-package com.mybanking.data.dao;
+package com.mybanking.data.dao.app;
 
+import com.mybanking.data.dao.AbstractSqlDao;
+import com.mybanking.data.dao.client.ClientSqlDao;
 import com.mybanking.data.entity.app.Account;
 import com.mybanking.data.entity.Client;
 

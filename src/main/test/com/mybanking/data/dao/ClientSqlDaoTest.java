@@ -1,57 +1,97 @@
 package com.mybanking.data.dao;
 
 import com.mybanking.data.DataSourceHolder;
+import com.mybanking.data.dao.client.ClientSqlDao;
+import com.mybanking.data.dao.client.PassportSqlDao;
 import com.mybanking.data.entity.Client;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.mybanking.data.entity.Passport;
+import org.junit.jupiter.api.*;
 
 import java.util.List;
 
-class ClientSqlDaoTest {
-    private static ClientSqlDao dao = new ClientSqlDao(DataSourceHolder.getDataSource());
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    static Client createClient() {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class ClientSqlDaoTest {
+    private static PassportSqlDao passportDao;
+    private static ClientSqlDao dao;
+    private static Client client;
+
+    public static Client createClient() {
         return new Client().
                 setPhone("388800553535").
                 setPassport(PassportSqlDaoTest.createPassport());
     }
 
-    @DisplayName("All CRUD chain operations")
-    @Test
-    void chainOperations() {
-        Client client = createClient();
+    @BeforeAll
+    static void init() {
+        passportDao = new PassportSqlDao(DataSourceHolder.getDataSource());
+        dao = new ClientSqlDao(DataSourceHolder.getDataSource());
+        client = createClient();
+    }
 
+    @Order(1)
+    @Test
+    public void save() {
+        passportDao.save(client.getPassport());
+        Passport passportInDb = passportDao.findByNumber(client.getPassport().getNumber()).get();
+        client.setPassport(passportInDb);
         dao.save(client);
+    }
+
+    @Order(2)
+    @Test
+    public void findByPassport() {
         Client expected = dao.findByPassport(client.getPassport()).get();
-        Assertions.assertEquals(expected, client);
-
-        client.
-            setId(expected.getId()).
-            setPhone("012345678910");
-        client.getPassport().
-            setName("Dudya").
-            setSurname("BigTestov").
-            setPatronymic("Bigovoch");
-
-        dao.update(client);
-
-        expected = dao.find(client.getId()).get();
-        Assertions.assertEquals(expected, client);
-
-        dao.delete(client.getId());
-        Assertions.assertTrue(dao.find(expected.getId()).isEmpty());
+        assertEquals(expected, client);
     }
 
+    @Order(3)
     @Test
-    void getAll() {
-        Client client = createClient();
-
-        dao.save(client);
-
-        List<Client> clients = dao.getAll();
-
-        Assertions.assertTrue(clients.contains(client));
-        dao.delete(dao.findByPassport(client.getPassport()).get().getId());
+    public void findByPhone() {
+        Client expected = dao.findByPhone(client.getPhone()).get();
+        assertEquals(expected, client);
+        client.setId(expected.getId());
     }
+
+    @Order(4)
+    @Test
+    public void find() {
+        Client expected = dao.find(client.getId()).get();
+        assertEquals(expected, client);
+    }
+
+    @Order(5)
+    @Test
+    public void update() {
+        client.
+                setPhone("012345678910");
+        client.getPassport().
+                setName("Dudya").
+                setSurname("BigTestov").
+                setPatronymic("Bigovoch");
+
+        passportDao.update(client.getPassport());
+        dao.update(client);
+    }
+    @Order(6)
+    @Test
+    public void delete() {
+        dao.delete(client.getId());
+        passportDao.delete(client.getPassport().getId());
+        assertTrue(dao.find(client.getId()).isEmpty());
+    }
+
+//    @Order(7)
+//    @Test
+//    public void getAll() {
+//        dao.save(client);
+//
+//        List<Client> clients = dao.getAll();
+//
+//        assertTrue(clients.contains(client));
+//        dao.findByPhone(client.getPhone()).
+//                ifPresent(inDb -> dao.delete(inDb.getId()));
+//    }
 }

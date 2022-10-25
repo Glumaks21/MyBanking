@@ -12,9 +12,7 @@ public class Client {
     }
 
     public Client setId(long id) {
-        if (id > 0) {
-            this.id = id;
-        }
+        this.id = id;
         return this;
     }
 
@@ -23,7 +21,6 @@ public class Client {
     }
 
     public Client setPassport(Passport passport) {
-        Objects.requireNonNull(passport);
         this.passport = passport;
         return this;
     }
@@ -33,9 +30,7 @@ public class Client {
     }
 
     public Client setPhone(String phone) {
-        if (phone.matches("\\d{12}")) {
-            this.phone = phone;
-        }
+        this.phone = phone;
         return this;
     }
 
