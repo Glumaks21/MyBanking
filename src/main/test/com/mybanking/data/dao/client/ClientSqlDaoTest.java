@@ -1,19 +1,15 @@
-package com.mybanking.data.dao;
+package com.mybanking.data.dao.client;
 
 import com.mybanking.data.DataSourceHolder;
-import com.mybanking.data.dao.client.ClientSqlDao;
-import com.mybanking.data.dao.client.PassportSqlDao;
-import com.mybanking.data.entity.Client;
-import com.mybanking.data.entity.Passport;
+import com.mybanking.data.entity.client.Client;
+import com.mybanking.data.entity.client.Passport;
 import org.junit.jupiter.api.*;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ClientSqlDaoTest {
+public class ClientSqlDaoTest {
     private static PassportSqlDao passportDao;
     private static ClientSqlDao dao;
     private static Client client;

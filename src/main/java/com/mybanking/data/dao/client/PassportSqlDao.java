@@ -1,7 +1,9 @@
 package com.mybanking.data.dao.client;
 
 import com.mybanking.data.dao.AbstractSqlDao;
-import com.mybanking.data.entity.Passport;
+import com.mybanking.data.dao.app.AccountSqlDao;
+import com.mybanking.data.entity.client.Passport;
+import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -31,15 +33,18 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
 
     public Optional<Passport> findByNumber(String number) {
         Passport passport = null;
+        getLogger().info("Try to find by number");
         try (Connection connection = getDataSource().getConnection();
              PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_NUMBER)) {
             statement.setString(1, number);
 
+            getLogger().info("Execute query: " + statement.toString().substring(statement.toString().indexOf(" ") + 1));
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 passport = mapToPassport(resultSet);
             }
         } catch (SQLException e) {
+            getLogger().error(e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -49,16 +54,19 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
     @Override
     public Optional<Passport> find(long id) {
         Passport passport = null;
+        getLogger().info("Try to find by id");
         try (Connection connection = getDataSource().getConnection()) {
             PreparedStatement statement =
                     connection.prepareStatement(SQL_SELECT_BY_ID);
-            statement.setLong(1, id);
+            fillStatement(statement, id);
 
+            getLogger().info("Execute query: " + statement.toString().substring(statement.toString().indexOf(" ") + 1));
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 passport = mapToPassport(resultSet);
             }
         } catch (SQLException e) {
+            getLogger().error(e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -68,6 +76,7 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
     @Override
     public void save(Passport passport) {
         Connection connection = null;
+        getLogger().info("Try to save passport");
         try {
             connection = getDataSource().getConnection();
             connection.setAutoCommit(false);
@@ -80,11 +89,14 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
                     passport.getPatronymic(),
                     passport.getSex(),
                     passport.getBirthday());
+
+            getLogger().info("Execute query: " + statement.toString().substring(statement.toString().indexOf(" ") + 1));
             statement.execute();
 
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
+            getLogger().error(e.getMessage());
             tryToRollBack(connection);
             throw new RuntimeException(e);
         }
@@ -93,6 +105,7 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
     @Override
     public void update(Passport passport) {
         Connection connection = null;
+        getLogger().info("Try to update passport");
         try {
             connection = getDataSource().getConnection();
             connection.setAutoCommit(false);
@@ -106,11 +119,13 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
                     passport.getSex(),
                     passport.getBirthday(),
                     passport.getId());
+            getLogger().info("Execute query: " + statement.toString().substring(statement.toString().indexOf(" ") + 1));
             statement.execute();
 
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
+            getLogger().error(e.getMessage());
             tryToRollBack(connection);
             throw new RuntimeException(e);
         }
@@ -119,17 +134,20 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
     @Override
     public void delete(long id) {
         Connection connection = null;
+        getLogger().info("Try to delete passport");
         try {
             connection = getDataSource().getConnection();
             connection.setAutoCommit(false);
 
             PreparedStatement statement = connection.prepareStatement(SQL_DELETE_BY_ID);
             fillStatement(statement, id);
+            getLogger().info("Execute query: " + statement.toString().substring(statement.toString().indexOf(" ") + 1));
             statement.execute();
 
             connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
+            getLogger().error(e.getMessage());
             tryToRollBack(connection);
             throw new RuntimeException(e);
         }
@@ -137,10 +155,12 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
 
     @Override
     public List<Passport> getAll() {
+        getLogger().info("Try get all passports");
         try (Connection connection = getDataSource().getConnection()) {
             List<Passport> passports = new ArrayList<>();
             Statement statement = connection.createStatement();
 
+            getLogger().info("Execute query: " + SQL_SELECT_ALL);
             ResultSet resultSet = statement.executeQuery(SQL_SELECT_ALL);
             while (resultSet.next()) {
                 passports.add(mapToPassport(resultSet));
@@ -148,6 +168,7 @@ public class PassportSqlDao extends AbstractSqlDao<Passport> {
 
             return passports;
         } catch (SQLException e) {
+            getLogger().error(e.getMessage());
             throw new RuntimeException(e);
         }
     }

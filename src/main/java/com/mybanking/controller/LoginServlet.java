@@ -2,7 +2,7 @@ package com.mybanking.controller;
 
 import com.mybanking.controller.security.HashHelper;
 import com.mybanking.data.DataSourceHolder;
-import com.mybanking.data.dao.app.AppAccountSqlDao;
+import com.mybanking.data.dao.app.AccountSqlDao;
 import com.mybanking.data.dao.app.PasswordHashesSqlDao;
 import com.mybanking.data.entity.app.Account;
 import com.mybanking.data.entity.app.PasswordHash;
@@ -16,7 +16,7 @@ import java.io.IOException;
 public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        AppAccountSqlDao accountDao = new AppAccountSqlDao(DataSourceHolder.getDataSource());
+        AccountSqlDao accountDao = new AccountSqlDao(DataSourceHolder.getDataSource());
         PasswordHashesSqlDao passwordDao = new PasswordHashesSqlDao(DataSourceHolder.getDataSource());
 
         String phone = req.getParameter("phone");

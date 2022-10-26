@@ -1,4 +1,4 @@
-package com.mybanking.data.entity;
+package com.mybanking.data.entity.client;
 
 import java.util.Objects;
 

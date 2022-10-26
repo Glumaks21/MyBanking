@@ -1,6 +1,6 @@
 package com.mybanking.data.entity.app;
 
-import com.mybanking.data.entity.Client;
+import com.mybanking.data.entity.client.Client;
 
 import java.util.Objects;
 

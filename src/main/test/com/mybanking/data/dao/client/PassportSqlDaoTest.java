@@ -1,18 +1,16 @@
-package com.mybanking.data.dao;
+package com.mybanking.data.dao.client;
 
 import com.mybanking.data.DataSourceHolder;
 
-import com.mybanking.data.dao.client.PassportSqlDao;
-import com.mybanking.data.entity.Passport;
-import static org.junit.jupiter.api.Assertions.*;
-
+import com.mybanking.data.entity.client.Passport;
 import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.Date;
 import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class PassportSqlDaoTest {
+public class PassportSqlDaoTest {
     private static Passport passport;
     private static PassportSqlDao dao;
 

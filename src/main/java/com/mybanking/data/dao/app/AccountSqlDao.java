@@ -3,7 +3,8 @@ package com.mybanking.data.dao.app;
 import com.mybanking.data.dao.AbstractSqlDao;
 import com.mybanking.data.dao.client.ClientSqlDao;
 import com.mybanking.data.entity.app.Account;
-import com.mybanking.data.entity.Client;
+import com.mybanking.data.entity.client.Client;
+import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class AppAccountSqlDao extends AbstractSqlDao<Account> {
+public class AccountSqlDao extends AbstractSqlDao<Account> {
     static String SQL_SELECT_BY_ID = "SELECT * FROM app_accounts ac " +
             "JOIN clients c ON(ac.client_id = c.id) " +
             "JOIN passports p ON(c.passport_id = p.id)" +
@@ -27,15 +28,18 @@ public class AppAccountSqlDao extends AbstractSqlDao<Account> {
             "JOIN passports p ON (c.passport_id = p.id) " +
             "WHERE number = ?), ?);";
 
-    static String SQL_UPDATE_BY_ID = "UPDATE app_accounts SET email = ? WHERE id = ?;";
+    static String SQL_UPDATE_BY_ID = "UPDATE app_accounts SET email = ? " +
+            "WHERE id = ?;";
 
-    static String SQL_DELETE_BY_ID = "DELETE FROM app_accounts WHERE id = ?;";
+    static String SQL_DELETE_BY_ID = "DELETE FROM app_accounts " +
+            "WHERE id = ?;";
 
     static String SQL_SELECT_ALL = "SELECT * FROM app_accounts ac " +
             "JOIN clients c ON(ac.client_id = c.id) " +
             "JOIN passports p ON(c.passport_id = p.id);";
 
-    public AppAccountSqlDao(DataSource dataSource) {
+
+    public AccountSqlDao(DataSource dataSource) {
         super(dataSource);
     }
 

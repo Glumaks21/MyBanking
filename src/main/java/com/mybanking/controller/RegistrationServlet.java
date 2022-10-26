@@ -2,9 +2,9 @@ package com.mybanking.controller;
 
 import com.mybanking.data.DataSourceHolder;
 import com.mybanking.data.dao.app.PasswordHashesSqlDao;
-import com.mybanking.data.dao.app.AppAccountSqlDao;
+import com.mybanking.data.dao.app.AccountSqlDao;
 import com.mybanking.data.dao.client.ClientSqlDao;
-import com.mybanking.data.entity.Client;
+import com.mybanking.data.entity.client.Client;
 import com.mybanking.data.entity.app.Account;
 import com.mybanking.data.entity.app.PasswordHash;
 import com.mybanking.controller.security.HashHelper;
@@ -46,7 +46,7 @@ public class RegistrationServlet extends HttpServlet {
     }
 
     private boolean checkRegistered(String phone) {
-        AppAccountSqlDao accountDao = new AppAccountSqlDao(DataSourceHolder.getDataSource());
+        AccountSqlDao accountDao = new AccountSqlDao(DataSourceHolder.getDataSource());
         Optional<Account> optionalAccount = accountDao.findByPhone(phone);
         return optionalAccount.isPresent();
     }
@@ -59,7 +59,7 @@ public class RegistrationServlet extends HttpServlet {
 
     private void registerNewAccount(String phone, String password) {
         ClientSqlDao clientDao = new ClientSqlDao(DataSourceHolder.getDataSource());
-        AppAccountSqlDao accountDao = new AppAccountSqlDao(DataSourceHolder.getDataSource());
+        AccountSqlDao accountDao = new AccountSqlDao(DataSourceHolder.getDataSource());
         PasswordHashesSqlDao passwordHashDao = new PasswordHashesSqlDao(DataSourceHolder.getDataSource());
 
         Client dbClient = clientDao.findByPhone(phone).get();

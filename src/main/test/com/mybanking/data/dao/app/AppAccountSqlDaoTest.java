@@ -1,11 +1,11 @@
-package com.mybanking.data.dao;
+package com.mybanking.data.dao.app;
 
 import com.mybanking.data.DataSourceHolder;
-import com.mybanking.data.dao.app.AppAccountSqlDao;
 import com.mybanking.data.dao.client.ClientSqlDao;
+import com.mybanking.data.dao.client.ClientSqlDaoTest;
 import com.mybanking.data.dao.client.PassportSqlDao;
-import com.mybanking.data.entity.Client;
-import com.mybanking.data.entity.Passport;
+import com.mybanking.data.entity.client.Client;
+import com.mybanking.data.entity.client.Passport;
 import com.mybanking.data.entity.app.Account;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,14 +15,14 @@ import org.junit.jupiter.api.*;
 class AppAccountSqlDaoTest {
     private static PassportSqlDao passportDao;
     private static ClientSqlDao clientDao;
-    private static AppAccountSqlDao dao;
+    private static AccountSqlDao dao;
     private static Account account;
 
     @BeforeAll
     static void init() {
         passportDao = new PassportSqlDao(DataSourceHolder.getDataSource());
         clientDao = new ClientSqlDao(DataSourceHolder.getDataSource());
-        dao = new AppAccountSqlDao(DataSourceHolder.getDataSource());
+        dao = new AccountSqlDao(DataSourceHolder.getDataSource());
         account = createAccount();
     }
 

@@ -1,7 +1,7 @@
 package com.mybanking.controller;
 
 import com.mybanking.data.DataSourceHolder;
-import com.mybanking.data.dao.app.AppAccountSqlDao;
+import com.mybanking.data.dao.app.AccountSqlDao;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,7 +14,7 @@ import java.io.IOException;
 public class EnterAccountServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        AppAccountSqlDao dao = new AppAccountSqlDao(DataSourceHolder.getDataSource());
+        AccountSqlDao dao = new AccountSqlDao(DataSourceHolder.getDataSource());
 
         
     }
